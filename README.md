@@ -1,5 +1,7 @@
 # SDD OpenSpec Planner
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A **multi-tool planning agent** for spec-driven development (SDD) using the [OpenSpec](https://github.com/Fission-AI/OpenSpec) framework. Works with Claude Code, Codex (OpenAI), Pi, OpenCode, Cursor, GitHub Copilot, and 20+ other agentic coding tools.
 
 ## What It Does
@@ -20,7 +22,8 @@ It never writes code — it produces a plan for a developer or AI agent to imple
 
 ```
 sdd-openspec-planner/
-├── sdd-openspec-planner.md               # Original OpenCode agent definition
+├── sdd-planner.md                         # Canonical instructions · OpenCode agent (installs as `sdd-planner`)
+├── sdd-openspec-planner.md                # OpenCode agent definition (same instructions)
 ├── sdd-openspec-planner-agent.md          # General agent (drop into any tool)
 ├── .opencode/skills/sdd-openspec-planner/ # OpenCode skill
 │   └── SKILL.md
@@ -31,6 +34,10 @@ sdd-openspec-planner/
 └── .pi/skills/sdd-openspec-planner/       # Pi skill
     └── SKILL.md
 ```
+
+Every adapter ships the **same tool-neutral instructions** — only the
+frontmatter differs per tool, so the planning logic can never drift between
+installs.
 
 ## Quick Install
 
@@ -45,7 +52,8 @@ Then choose your tool:
 ### Claude Code
 
 ```bash
-cp /tmp/sdd-planner/sdd-openspec-planner.md .claude/agents/sdd-openspec-planner.md
+mkdir -p .claude/agents
+cp /tmp/sdd-planner/.claude/agents/sdd-openspec-planner.md .claude/agents/sdd-openspec-planner.md
 ```
 
 Invoke: `/sdd-openspec-planner plan a dark mode feature`
@@ -70,13 +78,13 @@ Invoke: `/sdd-openspec-planner` via skill picker
 
 ### OpenCode
 
-The agent at `~/.config/opencode/agents/sdd-openspec-planner.md` is already configured if you cloned into your OpenCode config. Otherwise:
-
 ```bash
-cp /tmp/sdd-planner/sdd-openspec-planner.md ~/.config/opencode/agents/sdd-openspec-planner.md
+cp /tmp/sdd-planner/sdd-planner.md ~/.config/opencode/agents/sdd-planner.md
 ```
 
-Invoke: use the Task tool with `subagent_type: sdd-openspec-planner`
+Invoke: `@sdd-planner` in a message or the Task tool with
+`subagent_type: sdd-planner`. The repo also ships a project skill at
+`.opencode/skills/sdd-openspec-planner/` (invoke `/sdd-openspec-planner`).
 
 ### Cursor
 
@@ -128,7 +136,8 @@ Every phase ends with a mandatory human approval gate. No phase begins without e
 ## Key Design Decisions
 
 - **Never implements code** — sole responsibility is planning
-- **Human-in-the-loop** — mandatory approval gates after every phase
+- **Guardrails travel with the plan** — the EXECUTION GUARDRAILS preamble is written verbatim at the top of `tasks.md`, the file the implementer reads first
+- **One gate per phase** — gate count must equal phase count, and every gate is the final task of its phase; "just do it all" does not lift the gates
 - **Spec-first** — requirements (WHAT) before design (HOW)
 - **TDD assessment** — evaluates whether test-driven development is suitable
 - **Design pattern assessment** — only introduces patterns with concrete benefit
@@ -138,3 +147,7 @@ Every phase ends with a mandatory human approval gate. No phase begins without e
 
 - [OpenSpec Framework](https://github.com/Fission-AI/OpenSpec)
 - [OpenSpec Supported Tools](https://github.com/Fission-AI/OpenSpec/blob/main/docs/supported-tools.md)
+
+## License
+
+MIT — see [LICENSE](LICENSE).
